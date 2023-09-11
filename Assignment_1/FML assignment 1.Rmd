@@ -1,0 +1,60 @@
+---
+title: "FML Assignment 1"
+author: "Yashwanth Reddy Sadala"
+date: "2023-09-10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+#PART A-READING THE DATASET
+
+```{r}
+library(readr)
+Games <- read_csv("~/Downloads/Games.csv")
+View(Games)
+```
+#PART B-DESCRIPTIVE STATISTICS FOR NUMERIC VARIABLES
+
+```{r}
+summary(Games)
+mean(Games$Sales)
+median(Games$Sales)
+min(Games$Sales)
+max(Games$Sales)
+var(Games$Sales)
+sd(Games$Sales)
+str(Games$Sales)
+```
+#PART C-DESCRIPTIVE STATISTICS FOR QUALITATIVE DATA
+
+```{r}
+table(Games$Sales)
+Games$Sales
+table(Games$Genre)
+str(Games$Genre)
+```
+#PART D-TRANSFORMING VARIABLES
+
+```{r}
+log(Games$Sales)
+log(Games$Tax)
+```
+```{r}
+y<-Games$Sales-mean(Games$Sales)/sd(Games$Sales)
+y
+```
+#PART E-PLOTTING THE VARIABLE
+
+```{r}
+hist(Games$Sales,main="HISTOGRAM OF SALES")
+```
+#PART F-SCATTER PLOT
+
+```{r}
+plot(Games$Sales,Games$Tax,main="scatterplot")
+```
+
+
+
