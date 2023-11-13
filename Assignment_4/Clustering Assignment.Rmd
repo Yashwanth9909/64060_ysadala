@@ -2,7 +2,9 @@
 title: "Assignment 4 Clustering"
 author: "YASHWANTH REDDY SADALA"
 date: "2023-11-13"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -44,9 +46,9 @@ library(cluster)
 ```{r}
 Pharmaceuticals <- read.csv("C:/Users/yashw/FML/Pharmaceuticals.csv")
 Pharma <- na.omit(Pharmaceuticals) 
-head(pharmaceuticals)
-dim(pharmaceuticals)
-t(t(names(pharmaceuticals)))
+head(Pharmaceuticals)
+dim(Pharmaceuticals)
+t(t(names(Pharmaceuticals)))
 ```
 
 #1. Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on.
@@ -54,10 +56,10 @@ t(t(names(pharmaceuticals)))
 ```{r}
 #using only the quantitative variables(1-9) to cluster the 21 firms
 row.names(Pharma)<- Pharma[,1]
-Pharma1<- Pharma_data[,3:11]
+Pharma1<- Pharma[,3:11]
 
 #Considering only numerical values 3-11 columns.
-head(Pharma_data1)
+head(Pharma1)
 ```
 
 ```{r}
@@ -75,7 +77,7 @@ fviz_nbclust(Pharma2, kmeans, method = "silhouette")
 ```
 #Applying K-means clustering 
 ```{r}
-set.seed(199)
+set.seed(150)
 clus5<- kmeans(Pharma2,centers=5,nstart = 25)
 ```
 
@@ -115,23 +117,41 @@ clusplot(Pharma2,fit$cluster,color =
 
 ```
 
+#2. Interpret the clusters in light of the numerical variables that were utilised to create them.
 ```{r}
-#2
-#Interpret the clusters in light of the numerical variables that were utilised to create them.
+Pharmacluster <- Pharma[,c(12,13,14)]%>% mutate(clusters = clus5$cluster)%>% arrange(clusters, ascending = TRUE)
+Pharmacluster
+```
 
-#Cluster 1 - AGN, PHA, BAY - These have the highest PE_Ratio. By observing the mean values of all quantitative variables for each cluster. The ROE value is poor.
-#JNJ, MRK, GSK, and PFE are in Cluster_2 and have the biggest market capitalization and good leverage value.
-#AHM, AVE, and WPI are in Cluster_3, they have the lowest beta and asset turnover.
-#Cluster 4: The lowest market capitalization, leverage, and beta are exhibited by IVX, MRX, ELN, and CHTT.
-#They're good. Its revenue growth is the highest.
-#Cluster 5: ABT, NVS, AZN, LLY, BMY, WYE, SGP - These companies have the largest net profit margin, the biggest asset turnover, and the lowest sales growth.
+#Cluster 1 - AHM, WYE,BMY,AZN,ABV,SGP,LLY,NVS ( low Market_Cap,low Beta,low PE_Ratio,high Leverage,high Rev_Growth.)
+#Cluster 2 - GSK,JNJ,MRK and PFE (High Market_Cap,ROE, ROA,Asset_Turnover Ratio and low Beta/PE Ratio)
+#Cluster 3 - AGN,PHA (low Asset_Turnover, High PE Ratio)
+#Cluster 4 - ELN,MRX,WPI,AVE (low PE_Ratio,high ROE,low ROA,low Net_Profit_Margin, high Rev_Growth)
+#Cluster 5 - BAY,CHTT,IVX (low Rev_Growth,high Beta and levearge,low Net_Profit_Margin)
 
 #Do the clusters exhibit any patterns in relation to the numerical variables (10–12)? (those not utilized in cluster formation)
 
-#For cluster 1: It should be held in accordance with media recommendations as it has the highest PE Ratio.
-#For cluster 2: It has a good leverage value and the largest market capitalization. Additionally, they can be rather violent.
-#For cluster 3: Its beta and asset turnover are the lowest. However, media endorsements are very positive.
-#For cluster 4: They come with a modest recommendation despite the high leverage ratio.
-#For Cluster 5: They have the largest net profit margin, the highest asset turnover, and the lowest revenue growth.
-Pharmacluster <- Pharma[,c(12,13,14)]%>% mutate(clusters = clus5$cluster)%>% arrange(clusters, ascending = TRUE)
-Pharmacluster
+```{r}
+Pharma <- Pharmaceuticals[12:14] %>% mutate(Clusters=clus5$cluster)
+ggplot(Pharma, mapping = aes(factor(Clusters), fill =Median_Recommendation))+geom_bar(position='dodge')+labs(x ='Clusters',y ='Frequence')
+ggplot(Pharma, mapping = aes(factor(Clusters),fill = Location))+
+  geom_bar(position = 'dodge')+labs(x ='Clusters',y = 'Frequence')
+ggplot(Pharma, mapping = aes(factor(Clusters),fill = Exchange))+geom_bar(position = 'dodge')+
+  labs(x ='Clusters',y = 'Frequence')
+```
+
+#As can be seen from the graph above, cluster 1 has a moderate level of leverage and little profit. The graph establishes a moderate purchase and hold level.
+#Because cluster 2 has an equal amount of moderate purchase and sell, there may be room for growth in these companies given their significant revenue growth.
+#Cluster 3 has a high hold rate and a sizable profit margin, which will entice investors to purchase more of this cluster.
+#Cluster 4 exhibits both large profit margins and a significant degree of market capitalization. It reflects the company's great potential and has a degree of purchase and hold equal to it.
+#The graph in cluster 5 illustrates how high debt causes high leverage.
+
+
+#3. Provide an appropriate name for each cluster using any or all of the variables in the dataset.
+
+#Cluster 1: Perfect Asset
+#Cluster 2: Investment over the long run
+#Cluster 3: Dangerous Risk 
+#Cluster 4: potential Growth 
+#Cluster 5: Investment over the short term
+
