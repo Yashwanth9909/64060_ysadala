@@ -1,0 +1,137 @@
+---
+title: "Assignment 4 Clustering"
+author: "YASHWANTH REDDY SADALA"
+date: "2023-11-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Problem Statement:
+An equities analyst is studying the pharmaceutical industry and would like your help in exploring and understanding the financial data collected by her firm. Her main objective is to understand the structure of the pharmaceutical industry using some basic financial measures. Financial data gathered on 21 firms in the pharmaceutical industry are available in the file Pharmaceuticals.csv. For each firm, the following variables are recorded:  
+
+1.Market capitalization (in billions of dollars)
+2.Beta
+3.Price/earnings ratio
+4.Return on equity
+5.Return on assets
+6.Asset turnover
+7.Leverage
+8.Estimated revenue growth
+9.Net profit margin
+10.Median recommendation (across major brokerages)
+11.Location of firm’s headquarters
+12.Stock exchange on which the firm is listed
+
+Use cluster analysis to explore and analyze the given dataset as follows: 
+
+1.Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on. 
+2.Interpret the clusters with respect to the numerical variables used in forming the clusters. Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? (those not used in forming the clusters)
+3.Provide an appropriate name for each cluster using any or all of the variables in the dataset.
+
+#Running the necessary libraries
+```{r}
+library(tidyverse)
+library(factoextra)
+library(dplyr)
+library(ggplot2)
+library(cluster)
+```
+
+#Importing and reading the CSV file
+```{r}
+Pharmaceuticals <- read.csv("C:/Users/yashw/FML/Pharmaceuticals.csv")
+Pharma <- na.omit(Pharmaceuticals) 
+head(pharmaceuticals)
+dim(pharmaceuticals)
+t(t(names(pharmaceuticals)))
+```
+
+#1. Use only the numerical variables (1 to 9) to cluster the 21 firms. Justify the various choices made in conducting the cluster analysis, such as weights for different variables, the specific clustering algorithm(s) used, the number of clusters formed, and so on.
+
+```{r}
+#using only the quantitative variables(1-9) to cluster the 21 firms
+row.names(Pharma)<- Pharma[,1]
+Pharma1<- Pharma_data[,3:11]
+
+#Considering only numerical values 3-11 columns.
+head(Pharma_data1)
+```
+
+```{r}
+#Normalizing data
+Pharma2<-scale(Pharma1)
+head(Pharma2)
+```
+#Additionally, to calculate how many clusters to need for the Elbow Method cluster analysis
+```{r}
+fviz_nbclust(Pharma2, kmeans, method = "wss")
+```
+#Looking at the Elbow method's above graph, we can see that it's unclear which of the values k=2, 3, 4, or 5 to select. The silhouette method for counting the number of clusters
+```{r}
+fviz_nbclust(Pharma2, kmeans, method = "silhouette")
+```
+#Applying K-means clustering 
+```{r}
+set.seed(199)
+clus5<- kmeans(Pharma2,centers=5,nstart = 25)
+```
+
+#Visualizing the output
+```{r}
+clus5$centers
+```
+#Visualizing the clusters
+```{r}
+fviz_cluster(clus5,data = Pharma2) 
+```
+
+```{r}
+clus5
+```
+
+```{r}
+distance<- dist(Pharma2, method = "euclidean")
+fviz_dist(distance)
+```
+
+#There are five clusters, as can be seen, and the center is established after 25 restarts, as calculated using the k-means algorithm. K - Cluster Analysis of Means Fit five clusters to the data.
+```{r}
+fit<-kmeans(Pharma2,5)
+```
+
+#Determining each cluster's mean value for every quantitative variable
+```{r}
+aggregate(Pharma2,by=list(fit$cluster),FUN=mean)
+
+```
+
+#To see the layout of clusters
+```{r}
+clusplot(Pharma2,fit$cluster,color =
+           TRUE,shade = TRUE,labels = 2,lines = 0)
+
+```
+
+```{r}
+#2
+#Interpret the clusters in light of the numerical variables that were utilised to create them.
+
+#Cluster 1 - AGN, PHA, BAY - These have the highest PE_Ratio. By observing the mean values of all quantitative variables for each cluster. The ROE value is poor.
+#JNJ, MRK, GSK, and PFE are in Cluster_2 and have the biggest market capitalization and good leverage value.
+#AHM, AVE, and WPI are in Cluster_3, they have the lowest beta and asset turnover.
+#Cluster 4: The lowest market capitalization, leverage, and beta are exhibited by IVX, MRX, ELN, and CHTT.
+#They're good. Its revenue growth is the highest.
+#Cluster 5: ABT, NVS, AZN, LLY, BMY, WYE, SGP - These companies have the largest net profit margin, the biggest asset turnover, and the lowest sales growth.
+
+#Do the clusters exhibit any patterns in relation to the numerical variables (10–12)? (those not utilized in cluster formation)
+
+#For cluster 1: It should be held in accordance with media recommendations as it has the highest PE Ratio.
+#For cluster 2: It has a good leverage value and the largest market capitalization. Additionally, they can be rather violent.
+#For cluster 3: Its beta and asset turnover are the lowest. However, media endorsements are very positive.
+#For cluster 4: They come with a modest recommendation despite the high leverage ratio.
+#For Cluster 5: They have the largest net profit margin, the highest asset turnover, and the lowest revenue growth.
+Pharmacluster <- Pharma[,c(12,13,14)]%>% mutate(clusters = clus5$cluster)%>% arrange(clusters, ascending = TRUE)
+Pharmacluster
